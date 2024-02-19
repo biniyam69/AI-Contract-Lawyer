@@ -1,7 +1,3 @@
-Sure, here's an example of what your README file might look like for this project:
-
----
-
 # CONTRACT LAWYER RAG
 
 ## Overview
