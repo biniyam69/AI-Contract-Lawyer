@@ -30,7 +30,7 @@ The project is structured into several tasks, including:
 - TensorFlow or PyTorch
 
 ## Usage
-1. Clone the repository: `git clone https://github.com/yourusername/contract-qna-rag.git`
+1. Clone the repository: `git clone https://github.com/biniyam69/ai-contract-lawyer.git`
 2. Install dependencies: `pip install -r requirements.txt`
 3. Run the main script: `python main.py`
 4. Follow the prompts to interact with the RAG system.
