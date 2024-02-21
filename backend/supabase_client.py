@@ -4,9 +4,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from supabase import create_client, Client
+from dotenv import load_dotenv
 
-url: str = 'https://gyowcxxjadsfkyyjiccv.supabase.co'
-key: str = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5b3djeHhqYWRzZmt5eWppY2N2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDg0NjkwNDUsImV4cCI6MjAyNDA0NTA0NX0.iTi2bFhjDrncJ_cVzQiEdacY8GZcr5vgHC8f4UcFt-'
+load_dotenv()
+
+url: str = os.getenv('SUPABASE_URL')
+key: str = os.getenv('SUPABASE_KEY')
 supabase: Client = create_client(url, key)
 
 # CONNECT TO SUPABASE database

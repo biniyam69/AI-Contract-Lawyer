@@ -5,39 +5,75 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from typing import List
 import supabase
+from fastapi import APIRouter
+import dotenv
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+url = os.getenv('SUPABASE_URL')
+key = os.getenv('SUPABASE_KEY')
+
+
+
+supabase = supabase.create_client(url, key)
+
+
 
 app = FastAPI()
 
-UserModel = BaseModel(
-    "UserModel",
-    {
-        "name": str,
-        "email": str,
-        "password": str,
-    },
-)
+class UserModel(BaseModel):
+    email: str
+    password: str
 
 # sign up
+#supabase signup
+
+def signup(email: str, password: str):
+    res = supabase.auth.sign_up({
+      "email": '',
+      "password": '',
+    })
 
 @app.post("/signup")
-async def signup(user: User):
-    user = jsonable_encoder(user)
-    return JSONResponse(content=user)
-
-@app.post("/login")
-async def signin(user: User, email: str, password: str):
-    res = supabase.auth.sign_in({
-        'email': email,
-        'password': password
+async def signupuser(user: UserModel):
+    res = supabase.auth.sign_up({
+      "email": user.email,
+      "password": user.password,
     })
-    
     if res['error']:
         return JSONResponse(content={"error": res['error']})
     else:
         return JSONResponse(content={"access_token": res['access_token']})
     
+def login(email: str, password: str):
+    res = supabase.auth.sign_in({
+        'email': email,
+        'password': password
+    })
+    if res['error']:
+        return JSONResponse(content={"error": res['error']})
+    else:
+        return JSONResponse(content={"access_token": res['access_token']})
+
+
+# Login
+@app.post("/login")
+async def loginuser(user: UserModel):
+    res = supabase.auth.sign_in({
+        'email': user.email,
+        'password': user.password
+    })
+    if res['error']:
+        return JSONResponse(content={"error": res['error']})
+    else:
+        return JSONResponse(content={"access_token": res['access_token']})
+    
+
+# Logout  
 @app.post("/logout")
-async def logout():
+async def logoutuser():
     res = supabase.auth.sign_out()
     return JSONResponse(content={"message": "User logged out"})
 
