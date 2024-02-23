@@ -1,62 +1,55 @@
 import openai
-from langchain.chains import LLMChain
-from langchain.chat_models import ChatOpenAI
-from langchain.prompts import PromptTemplate
-from langchain.memory import ConversationBufferMemory
-from trulens_eval import TruChain, Feedback, OpenAI, Huggingface, Tru
-from langchain_community.vectorstores import Chroma
-from langchain_openai import OpenAIEmbeddings
-from langchain_community.document_loaders import DirectoryLoader
+from openai import OpenAI
+import os, sys
+import requests, dotenv
+from dotenv import load_dotenv
+from langchain_community.vectorstores import Qdrant
 from langchain_community.document_loaders import UnstructuredHTMLLoader
-from langchain.text_splitter import CharacterTextSplitter
-from langchain_community.embeddings.sentence_transformer import (
-    SentenceTransformerEmbeddings,
-)
+from langchain_openai import OpenAI, OpenAIEmbeddings
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
+from langchain.text_splitter import CharacterTextSplitter
 from langchain_core.output_parsers import StrOutputParser
+from langchain_openai import ChatOpenAI
 
-def setup_chatbot_chain():
-    # Load documents
-    loader = DirectoryLoader(path='/home/biniyam/TenAcademy/AI-Contract-Lawyer/notebook/imdb_data/', loader_cls=UnstructuredHTMLLoader)
-    docs = loader.load()
+load_dotenv()
+api_key = os.getenv('OPENAI_API_KEY')
 
-    # Split documents into chunks
+client = OpenAI(api_key=api_key)
+
+
+def setup_chatbot_chain(query: str) -> str:
+    loader = UnstructuredHTMLLoader('/home/biniyam/TenAcademy/AI-Contract-Lawyer/notebook/imdb_data/21_imdb.com.html')
+    document = loader.load()
+
     text_splitter = CharacterTextSplitter(chunk_size=512, chunk_overlap=0)
-    documents = text_splitter.split_documents(docs)
-
-    # Setup embeddings
-    embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-    vectorstore = Chroma(docs, embedding_function=embedding_function)
-    retriever = vectorstore.as_retriever()
-
-    # Setup chatbot components
-    template = """You will answer the following questions based on the following context:
+    docs = text_splitter.split_documents(documents=document)
+    embedding_function = OpenAIEmbeddings(model='text-embedding-3-large')
+    db = Qdrant.from_documents(docs, embedding_function, location=":memory:", collection_name="imdb_data")
+    
+    retriever = db.as_retriever()
+    
+    template = """You are a my personal private legal contract lawyer who know a lot of stuff about contracts.
+            You are responsible for assisting the user based on their respective questions about a certain contract
+ 
     {context}
+    
+    Question: {question}
+    Helpful answer:"""
+    
+    custom_rag_prompt = PromptTemplate.from_template(template)
+    
+    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
-    Question: {question}"""
-
-    prompt = PromptTemplate(input_variables=["context", "question"], template=template)
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo")
-
-    # Define the chatbot chain
-    chain = (RunnableParallel({"context": retriever, "question": RunnablePassthrough()})
-             | prompt
-             | llm
-             | StrOutputParser())
-
-    # Setup evaluation feedbacks
-    f_relevance = Feedback(openai.relevance).on_input_output()
-    f_hate = Feedback(openai.moderation_hate).on_output()
-    f_violent = Feedback(openai.moderation_violence, higher_is_better=False).on_output()
-    f_selfharmed = Feedback(openai.moderation_selfharm, higher_is_better=False).on_output()
-    f_malice = Feedback(openai.maliciousness_with_cot_reasons, higher_is_better=False).on_output()
-
-    # Setup TruChain for recording
-    chain_recorder = TruChain(
-        chain, app_id='Simple RAG', feedbacks=[f_relevance, f_hate, f_violent, f_selfharmed, f_malice]
+    rag_chain = (
+        {"context": retriever, "question": RunnablePassthrough()}
+        | custom_rag_prompt
+        | llm
+        | StrOutputParser()
     )
-
-    return chain_recorder
-
-# Example usage:
-# chatbot_chain = setup_chatbot_chain()
+    
+    for chunk in rag_chain.stream(query):
+        print(chunk, end="", flush=True)
+    
+    
+    
