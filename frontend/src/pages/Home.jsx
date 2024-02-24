@@ -114,57 +114,7 @@ import axios from 'axios';
 
 function Home() {
 
-  const fileInputRef = useRef(null);
-  const [text, setText] = useState('');
-  const [prompt, setPrompt] = useState('');
-
- 
-  useEffect(() => {
-    if(text){
-      setPrompt(`
-      Answer the following question based on the information in the provided text:
-      ${text}
-      `)
-    }
-    else{
-      setPrompt("")
-    }
-  }, [text]);
-
-  const handleButtonClick = () => {
-    // Trigger the file input when the button is clicked
-    fileInputRef.current.click();
-  };
-
-
-
-  const handleFileChange = async (event) => {
-    const selectedFile = event.target.files[0];
-
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-
-
-    try {
-      const response = await axios.post('http://127.0.0.1:5000/extract-text', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      setText(response.data.data);
-    } catch (error) {
-      console.error(error);
-    }
-
-  };
-
-  const systemMessage = { //  Explain things like you're talking to a software professional with 5 years of experience.
-    "role": "system", "content": prompt
-  }
-  
-
-
-  const [messages, setMessages] = useState([
-  
-  ]);
+  const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
 
   const handleSend = async (message) => {
@@ -174,76 +124,32 @@ function Home() {
       sender: "user"
     };
 
-    const newMessages = [...messages, newMessage];
-    
-    setMessages(newMessages);
+  setMessages([...messages, newMessage]);
+  setIsTyping(true);
 
-    // Initial system message to determine ChatGPT functionality
-    // How it responds, how it talks, etc.
-    setIsTyping(true);
-    await processMessageToChatGPT(newMessages);
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/chat', { 
+      query: message,
+    rag_chain: 'rag_chain' 
+  });
+
+  const LLMResponse = response.data.response;
+
+  const newLLMMessage = {
+    message: LLMResponse,
+    direction: 'incoming',
+    sender: "Cohere"
   };
 
-  async function processMessageToChatGPT(chatMessages) { // messages is an array of messages
-    // Format messages for chatGPT API
-    // API is expecting objects in format of { role: "user" or "assistant", "content": "message here"}
-    // So we need to reformat
+  setMessages([...messages, newLLMMessage]);
 
-    let apiMessages = chatMessages.map((messageObject) => {
-      let role = "";
-      if (messageObject.sender === "ChatGPT") {
-        role = "assistant";
-      } else {
-        role = "user";
-      }
-      return { role: role, content: messageObject.message}
-    });
-
-
-  
-    const apiRequestBody = {
-      "model": "gpt-4-1106-preview",
-      "messages": [
-        systemMessage,  // The system message DEFINES the logic of our chatGPT
-        ...apiMessages // The messages from our chat with ChatGPT
-      ]
-    }
-
-    console.log("apiRequestBody: ", apiRequestBody.messages)
-
-        try {
-          const response = await axios.post('http://127.0.0.1:5000/api/v1/chat', { message:apiRequestBody.messages});
-          console.log(response);
-          setMessages([...chatMessages, {
-                message: response.data.data,
-                sender: "ChatGPT"
-              }]);
-              setIsTyping(false);
-  
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-  
-
-    // await fetch('http://127.0.0.1:5000/api/v1/chat', 
-    // {
-    //   method: "POST",
-    //   headers: {
-    //     // "Authorization": "Bearer " + API_KEY,
-    //     "Content-Type": "application/json"
-    //   },
-    //   body: {"question": apiRequestBody.messages}
-    // }).then((data) => {
-    //   return data.json();
-    // }).then((data) => {
-    //   console.log("data: ", data)
-    //   setMessages([...chatMessages, {
-    //     message: data.data.message,
-    //     sender: "ChatGPT"
-    //   }]);
-    //   setIsTyping(false);
-    // });
+  } catch (error) {
+    console.error('Error fetching data:', error);
   }
+
+  setIsTyping(false);
+};
+
 
   return (
     <div className="App" style={{height:"90vh", margin:'auto'}}>
@@ -264,7 +170,7 @@ function Home() {
           <ChatContainer >       
             <MessageList 
               scrollBehavior="smooth" 
-              typingIndicator={isTyping ? <TypingIndicator content="ChatGPT is typing" /> : null}
+              typingIndicator={isTyping ? <TypingIndicator content="Assistant is typing" /> : null}
             >
               {messages.map((message, i) => {
                 return <Message style={{textAlign:'left'}} key={i} model={message} />
@@ -274,9 +180,7 @@ function Home() {
             onSend={handleSend} 
               style={{ textAlign:"left" }}  
               placeholder="Type message here" 
-             />    
-            
-    
+             /> 
           </ChatContainer>
         </MainContainer>
       </div>

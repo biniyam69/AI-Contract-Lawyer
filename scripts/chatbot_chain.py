@@ -3,6 +3,7 @@ from openai import OpenAI
 import os, sys
 import requests, dotenv
 from dotenv import load_dotenv
+
 from langchain_community.vectorstores import Qdrant
 from langchain_community.document_loaders import UnstructuredHTMLLoader
 from langchain_openai import OpenAI, OpenAIEmbeddings
@@ -12,44 +13,59 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
 
+from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers.document_compressors import CohereRerank
+from langchain_community.llms import Cohere
+from langchain_community.embeddings import CohereEmbeddings
+from langchain.retrievers.document_compressors import EmbeddingsFilter
+
 load_dotenv()
 api_key = os.getenv('OPENAI_API_KEY')
+cohere_api_key = os.getenv('COHERE_API_KEY')
 
-client = OpenAI(api_key=api_key)
+def preprocess_data():
+    """Preprocesses the data for the chatbot chain."""
 
-
-def setup_chatbot_chain(query: str) -> str:
     loader = UnstructuredHTMLLoader('/home/biniyam/TenAcademy/AI-Contract-Lawyer/notebook/imdb_data/21_imdb.com.html')
     document = loader.load()
 
     text_splitter = CharacterTextSplitter(chunk_size=512, chunk_overlap=0)
     docs = text_splitter.split_documents(documents=document)
-    embedding_function = OpenAIEmbeddings(model='text-embedding-3-large')
+
+    embedding_function = CohereEmbeddings(model="embed-english-light-v3.0")
+    embedding_filter = EmbeddingsFilter(embeddings=embedding_function, similarity_threshold=0.75)
     db = Qdrant.from_documents(docs, embedding_function, location=":memory:", collection_name="imdb_data")
-    
+
     retriever = db.as_retriever()
-    
+    compressor = CohereRerank(cohere_api_key=cohere_api_key)
+    compression_retriever = ContextualCompressionRetriever(base_compressor=compressor, base_retriever=retriever, type="rerank")
+
     template = """You are a my personal private legal contract lawyer who know a lot of stuff about contracts.
             You are responsible for assisting the user based on their respective questions about a certain contract
- 
+
     {context}
-    
+
     Question: {question}
     Helpful answer:"""
-    
+
     custom_rag_prompt = PromptTemplate.from_template(template)
-    
-    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+
+    llm = Cohere(temperature=0)  # Using Cohere as the LLM
 
     rag_chain = (
-        {"context": retriever, "question": RunnablePassthrough()}
+        {"context": compression_retriever, "question": RunnablePassthrough()}
         | custom_rag_prompt
         | llm
         | StrOutputParser()
     )
-    
+
+    return rag_chain
+
+def generate_response(query, rag_chain):
+    """Generates a response using the preprocessed data and returns the LLM's text output."""
+
+    response_text = ""
     for chunk in rag_chain.stream(query):
-        print(chunk, end="", flush=True)
-    
-    
-    
+        response_text += chunk
+
+    return response_text
