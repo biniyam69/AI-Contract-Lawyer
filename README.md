@@ -35,29 +35,54 @@ The project is structured into several tasks, including:
 - FastAPI
 
 ## How to setup
+---
 
-1. clone the repository
-     `git clone git@github.com:biniyam69/AI-Contract-Lawyer.git`
-2. create a new virtual environment
-     `venv new env your env name`
-3. install requirements
-     `pip install -r requirements.txt`
-4. go to backend and start the fastapi backend
-     `cd backend`
-     `uvicorn app:api
-6. go to the frontend dir, install node dependencies and start the frontend
-     `cd frontend`
-     `npm install`
-     `npm run dev`
-7. Go to your browser and look up localhost:3000/chat
+## Setup Instructions
 
+1. **Clone the Repository:**
+   ```bash
+   git clone git@github.com:biniyam69/AI-Contract-Lawyer.git
+   ```
 
+2. **Create a New Virtual Environment:**
+   ```bash
+   python -m venv <env_name>
+   ```
+   Replace `<env_name>` with your desired environment name.
 
-## Usage
-1. Clone the repository: `git clone https://github.com/biniyam69/ai-contract-lawyer.git`
-2. Install dependencies: `pip install -r requirements.txt`
-3. Run the main script: `python main.py`
-4. Follow the prompts to interact with the RAG system.
+3. **Activate the Virtual Environment:**
+   - For Windows:
+     ```bash
+     .\<env_name>\Scripts\activate
+     ```
+   - For macOS/Linux:
+     ```bash
+     source <env_name>/bin/activate
+     ```
+
+4. **Install Requirements:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+5. **Start the FastAPI Backend:**
+   ```bash
+   cd backend
+   uvicorn app:api
+   ```
+
+6. **Install Node Dependencies and Start the Frontend:**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+7. **Access the Application:**
+   - Open your browser and go to [http://localhost:3000/chat](http://localhost:3000/chat) to access the chat interface.
+
+---
+
 
 ## Screenshots
 ![Screenshot from 2024-03-20 13-18-10](https://github.com/biniyam69/AI-Contract-Lawyer/assets/91191700/dc45d90a-19bc-4df6-9b56-7820e72c7a0c)
