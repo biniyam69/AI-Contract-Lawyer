@@ -35,7 +35,9 @@ The project is structured into several tasks, including:
 3. Run the main script: `python main.py`
 4. Follow the prompts to interact with the RAG system.
 
-## Folder Structure
+## Screenshots
+![Screenshot from 2024-03-20 13-18-10](https://github.com/biniyam69/AI-Contract-Lawyer/assets/91191700/dc45d90a-19bc-4df6-9b56-7820e72c7a0c)
+
 
 
 ## Contributors
