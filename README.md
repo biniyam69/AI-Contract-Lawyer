@@ -28,6 +28,30 @@ The project is structured into several tasks, including:
 - Python 3.x
 - Langchain framework
 - TensorFlow or PyTorch
+- langchain
+- RAGAS
+- TruLens
+- Cohere API
+- FastAPI
+
+## How to setup
+
+1. clone the repository
+     `git clone git@github.com:biniyam69/AI-Contract-Lawyer.git`
+2. create a new virtual environment
+     `venv new env your env name`
+3. install requirements
+     `pip install -r requirements.txt`
+4. go to backend and start the fastapi backend
+     `cd backend`
+     `uvicorn app:api
+6. go to the frontend dir, install node dependencies and start the frontend
+     `cd frontend`
+     `npm install`
+     `npm run dev`
+7. Go to your browser and look up localhost:3000/chat
+
+
 
 ## Usage
 1. Clone the repository: `git clone https://github.com/biniyam69/ai-contract-lawyer.git`
