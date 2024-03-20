@@ -1,7 +1,7 @@
-# CONTRACT LAWYER RAG
+# OPTIMIZED CONTRACT LAWYER RAG
 
 ## Overview
-This repository contains the implementation of a Retrieval Augmented Generation (RAG) system for Contract Q&A. The project aims to build, evaluate, and improve a RAG system capable of answering questions related to legal contracts autonomously. The system leverages Langchain, a leading LLM application framework, for development and evaluation.
+This repository contains the implementation of a Retrieval Augmented Generation (RAG) system for Contract Q&A. In this project I aim to build, evaluate, and improve a RAG system capable of answering questions related to legal contracts autonomously. The system leverages Langchain, a leading LLM application framework, for development and evaluation. Fastapi for backend and React on the frontend.
 
 ## Objectives
 - Build a RAG system for Contract Q&A using Langchain.
@@ -87,6 +87,9 @@ The project is structured into several tasks, including:
 ## Screenshots
 ![Screenshot from 2024-03-20 13-18-10](https://github.com/biniyam69/AI-Contract-Lawyer/assets/91191700/dc45d90a-19bc-4df6-9b56-7820e72c7a0c)
 
+---
+
+![lawyerbro](https://github.com/biniyam69/AI-Contract-Lawyer/assets/91191700/98d8baa7-ceaa-4b99-9b0c-de8b5f4fd4c0)
 
 
 ## Contributors
