@@ -18,6 +18,10 @@ from langchain.retrievers.document_compressors import CohereRerank
 from langchain_community.llms import Cohere
 from langchain_community.embeddings import CohereEmbeddings
 from langchain.retrievers.document_compressors import EmbeddingsFilter
+from trulens_eval import TruChain, Feedback, Tru
+
+tru = Tru()
+tru.reset_database()
 
 load_dotenv()
 api_key = os.getenv('OPENAI_API_KEY')
